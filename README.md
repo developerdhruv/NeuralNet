@@ -20,14 +20,14 @@ To use NeuralNet in your Python projects, follow these steps:
    First, install the package from PyPI:
 
    ```bash
-   pip install NeuralNet
+   pip install neuralnetrag
 
 ## Usage
 Here’s the simple code to utilize in your Python code:
 
 ```bash
 
-    import neuralnet as net
+    import neuralnetrag as net
     
     def test_rust_functions():
         urls = ["https://botpress.com/blog/what-is-an-ai-agent"]
