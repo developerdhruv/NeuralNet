@@ -1,50 +1,38 @@
-use reqwest;
-use scraper::{Html, Selector};
-use std::error::Error;
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 
-fn extract_text_from_url(url: &str) -> Result<String, Box<dyn Error>> {
-    let body = reqwest::blocking::get(url)?.text()?;
-    let document = Html::parse_document(&body);
-    let selector = Selector::parse("p").unwrap();
+mod fetch;
+mod parse;
+mod similarity;
 
-    let mut content = String::new();
-    for element in document.select(&selector) {
-        content.push_str(&element.text().collect::<Vec<_>>().join(" "));
-        content.push(' ');
-    }
-    Ok(content)
-}
+use fetch::fetch_html;
+use parse::parse_html;
+use similarity::retrieve_similarity;
 
-fn extract_texts_from_urls(urls: &[&str]) -> Result<Vec<String>, Box<dyn Error>> {
-    let mut documents = Vec::new();
-    for &url in urls {
-        match extract_text_from_url(url) {
-            Ok(content) => documents.push(content),
-            Err(e) => eprintln!("Failed to fetch data from {}: {}", url, e),
+#[pyfunction]
+pub fn extract_top_k_relevant_chunks(url: &str, query: &str, k: usize, chunk_size: usize) -> PyResult<Vec<String>> {
+    match fetch_html(url) {
+        Ok(content) => {
+            let chunks = parse_html(&content, chunk_size);
+            let mut scored_chunks: Vec<(String, f64)> = chunks.into_iter()
+                .map(|chunk| (chunk.clone(), retrieve_similarity(query, &chunk)))
+                .collect();
+
+            scored_chunks.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+
+            let top_k_chunks = scored_chunks.into_iter()
+                .take(k)
+                .map(|(chunk, _)| chunk)
+                .collect();
+
+            Ok(top_k_chunks)
         }
+        Err(e) => Err(pyo3::exceptions::PyRuntimeError::new_err(e.to_string())),
     }
-    Ok(documents)
-}
-
-#[pyfunction]
-fn extract_texts(urls: Vec<&str>) -> PyResult<Vec<String>> {
-    match extract_texts_from_urls(&urls) {
-        Ok(docs) => Ok(docs),
-        Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string())),
-    }
-}
-
-// Placeholder for actual response generation function
-#[pyfunction]
-fn generate_response(query: String, documents: Vec<String>) -> PyResult<String> {
-    Ok(format!("Response for query '{}' with {} documents", query, documents.len()))
 }
 
 #[pymodule]
-fn neuralnet(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(extract_texts, m)?)?;
-    m.add_function(wrap_pyfunction!(generate_response, m)?)?;
+fn neuralnetrag(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(extract_top_k_relevant_chunks, m)?)?;
     Ok(())
 }
