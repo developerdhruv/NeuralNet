@@ -1,6 +1,6 @@
 [package]
 name = "neuralnetrag"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 
 [dependencies]
@@ -14,5 +14,5 @@ crate-type = ["cdylib"]
 
 [project]
 name = "neuralnetrag"
-version = "0.1.1"
+version = "0.1.2"
 description = "RAG library in Rust with Python bindings"
