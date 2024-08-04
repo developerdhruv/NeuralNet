@@ -10,7 +10,7 @@ use parse::parse_html;
 use similarity::retrieve_similarity;
 
 #[pyfunction]
-pub fn extract_top_k_relevant_chunks(url: &str, query: &str, k: usize, chunk_size: usize) -> PyResult<Vec<String>> {
+pub fn retrieve(url: &str, query: &str, k: usize, chunk_size: usize) -> PyResult<Vec<String>> {
     match fetch_html(url) {
         Ok(content) => {
             let chunks = parse_html(&content, chunk_size);
@@ -33,6 +33,6 @@ pub fn extract_top_k_relevant_chunks(url: &str, query: &str, k: usize, chunk_siz
 
 #[pymodule]
 fn neuralnetrag(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(extract_top_k_relevant_chunks, m)?)?;
+    m.add_function(wrap_pyfunction!(retrieve, m)?)?;
     Ok(())
 }
