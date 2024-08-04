@@ -27,19 +27,14 @@ Here’s the simple code to utilize in your Python code:
 
 ```bash
 
-    import neuralnetrag as net
-    
-    def test_rust_functions():
-        urls = ["https://botpress.com/blog/what-is-an-ai-agent"]
-        texts = net.extract_texts(urls)
-        print("Extracted texts:", texts)
-    
-        query = "how scaling support works"
-        response = net.generate_response(query, texts)
-        print("Generated response:", response)
-    
-    if __name__ == "__main__":
-        test_rust_functions()
+    import neuralnetrag as rag
+    url = "https://medium.com/llamaindex-blog/building-better-tools-for-llm-agents-f8c5a6714f11"
+    query = "AI and ai agents components"
+    k =1
+    chunk_size = 1000 
+    relevant_chunks = rag.extract_top_k_relevant_chunks(url, query, k, chunk_size)
+    print(relevant_chunks)
+
 
 ```
 ## Available Functions
