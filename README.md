@@ -32,7 +32,7 @@ Here’s the simple code to utilize in your Python code:
     query = "AI and ai agents components"
     k =1
     chunk_size = 1000 
-    relevant_chunks = rag.extract_top_k_relevant_chunks(url, query, k, chunk_size)
+    relevant_chunks = rag.retrieve(url, query, k, chunk_size)
     print(relevant_chunks)
 
 
